@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    # 数据源配置
+    url: jdbc:mysql://192.168.56.101:3306/pv?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 开发热部署配置
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,templates/**,WEB-INF/**
+
+# mybatis配置
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/**/*.xml
+
+# 服务器配置
+server:
+  port: 8089
+  servlet:
+    context-path: /postview
+    session:
+      timeout: 1800
+
+key:
+  path:
+    # 私钥
+    private: /u02/private.pem
+    # 公钥
+    public: /u02/public.pem
+
+# token有效时长
+expireMinutes: 2

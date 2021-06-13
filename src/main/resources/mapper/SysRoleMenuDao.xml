@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 角色菜单 -->
+<mapper namespace="org.bluron.postview.dao.SysRoleMenuDao">
+	
+	<!-- 实体与数据库表字段映射 -->
+	<resultMap id="sysRoleMenu" type="org.bluron.postview.entity.pojo.SysRoleMenu">
+        <result property="roleId" column="role_id"/>
+        <result property="menuId" column="menu_id"/>
+        <result property="createTime" column="create_time"/>
+	</resultMap>
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		t.role_id,t.menu_id,t.create_time
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="save" parameterType="org.bluron.postview.entity.pojo.SysRoleMenu">
+        insert into sys_role_menu (
+        	role_id,
+        	menu_id,
+        	create_time
+        ) values (
+        	#{roleId,jdbcType=NUMERIC},
+        	#{menuId,jdbcType=NUMERIC},
+			now()
+        )
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete">
+		delete from sys_role_menu where role_id = #{roleId}
+	</delete>
+
+	<!-- 根据角色Id查询 -->
+	<select id="getMenuByRoleId" resultMap="sysRoleMenu">
+        select <include refid="columns"/>
+		from sys_role_menu t
+		left join sys_menu t1 on t.menu_id = t1.menu_id
+        where role_id = #{roleId}
+		and t1.sup_menu_id is not null
+	</select>
+	
+	<sql id="where">
+		<where>	      				
+	        <if test=" roleId != null ">
+				and t.role_id = #{roleId}
+		    </if>
+	        <if test=" menuId != null ">
+				and t.menu_id = #{menuId}
+		    </if>
+		</where>
+	</sql>
+    
+    <!--分页查询-->
+    <select id="pageQuery" parameterType="org.bluron.postview.entity.vo.SysRoleMenuVo" resultMap="sysRoleMenu">
+    	select <include refid="columns"/>
+	    from sys_role_menu t
+		<include refid="where"/>
+    </select>
+	
+</mapper>

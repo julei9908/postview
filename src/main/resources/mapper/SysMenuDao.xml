@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 菜单 -->
+<mapper namespace="org.bluron.postview.dao.SysMenuDao">
+
+	<!-- 实体与数据库表字段映射 -->
+	<resultMap id="sysMenu" type="org.bluron.postview.entity.pojo.SysMenu">
+        <result property="menuId" column="menu_id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="menuUrl" column="menu_url"/>
+        <result property="menuIcon" column="menu_icon"/>
+        <result property="supMenuId" column="sup_menu_id"/>
+        <result property="state" column="state"/>
+        <result property="order" column="order"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+	</resultMap>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		t.menu_id,t.menu_name,t.menu_url,t.menu_icon,t.sup_menu_id,t.state,t.order,t.create_time,t.update_time
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="save" parameterType="org.bluron.postview.entity.pojo.SysMenu">
+        insert into sys_menu (
+        	menu_id,
+        	menu_name,
+        	menu_url,
+        	menu_icon,
+        	sup_menu_id,
+        	state,
+        	order,
+        	create_time
+        ) values (
+        	#{menuId},
+        	#{menuName,jdbcType=VARCHAR},
+        	#{menuUrl,jdbcType=VARCHAR},
+        	#{menuIcon,jdbcType=VARCHAR},
+        	#{supMenuId,jdbcType=NUMERIC} ,
+        	#{state,jdbcType=NUMERIC} ,
+        	#{order,jdbcType=NUMERIC} ,
+			now()
+        )
+	</insert>
+
+	<!-- 更新 -->
+	<update id="update">
+        update sys_menu set
+	        menu_name = #{menuName,jdbcType=VARCHAR},
+	        menu_url = #{menuUrl,jdbcType=VARCHAR},
+	        menu_icon = #{menuIcon,jdbcType=VARCHAR},
+	        sup_menu_id = #{supMenuId,jdbcType=NUMERIC},
+	        state = #{state,jdbcType=NUMERIC},
+	        order = #{order,jdbcType=NUMERIC}
+        where menu_id = #{menuId}
+	</update>
+
+	<!-- 更新不为空字段 -->
+	<update id="updateIfNotNull">
+        update sys_menu
+		<set>
+			<if test=" menuName != null and menuName != '' ">
+				menu_name = #{menuName,jdbcType=VARCHAR},
+			</if>
+			<if test=" menuUrl != null and menuUrl != '' ">
+				menu_url = #{menuUrl,jdbcType=VARCHAR},
+			</if>
+			<if test=" menuIcon != null and menuIcon != '' ">
+				menu_icon = #{menuIcon,jdbcType=VARCHAR},
+			</if>
+			<if test=" supMenuId != null ">
+				sup_menu_id = #{supMenuId,jdbcType=NUMERIC} ,
+			</if>
+			<if test=" state != null ">
+				state = #{state,jdbcType=NUMERIC} ,
+			</if>
+			<if test=" order != null ">
+				order = #{order,jdbcType=NUMERIC} ,
+			</if>
+		</set>
+		where menu_id = #{menuId}
+	</update>
+
+	<!-- 根据主键查询 -->
+    <select id="get" resultMap="sysMenu">
+		select <include refid="columns"/>
+		from sys_menu t
+		where t.menu_id = #{menuId}
+	</select>
+
+	<sql id="where">
+		<where>
+	        <if test=" menuId != null ">
+				and t.menu_id = #{menuId}
+		    </if>
+	        <if test=" menuName != null and menuName != '' ">
+				and t.menu_name like "%"#{menuName}"%"
+		    </if>
+	        <if test=" supMenuId != null ">
+				and t.sup_menu_id = #{supMenuId}
+		    </if>
+	        <if test=" state != null ">
+				and t.state = #{state}
+		    </if>
+	        <if test=" order != null ">
+				and t.order = #{order}
+		    </if>
+			<if test=" level != null and level == 0 ">
+				and t.sup_menu_id is null
+		    </if>
+			<if test=" query != null and query != '' ">
+				and (t.menu_name like "%"#{query}"%" or t.menu_id like "%"#{query}"%")
+			</if>
+		</where>
+	</sql>
+
+    <!-- 分页查询 -->
+    <select id="pageQuery" parameterType="org.bluron.postview.entity.vo.SysMenuVo" resultMap="sysMenu">
+    	select <include refid="columns"/>
+	    from sys_menu t
+		<include refid="where"/>
+		order by t.order desc
+    </select>
+
+	<!-- 导航菜单查询 -->
+    <select id="navMenu" resultMap="sysMenu">
+		select t1.menu_id,t2.menu_name,t2.menu_url,t2.menu_icon,t2.sup_menu_id,t2.state,t2.order
+		from sys_role_menu t1
+		left join sys_menu t2 on t1.menu_id = t2.menu_id
+		where t1.role_id = #{roleId}
+		and t2.state = 1
+		order by t2.order desc
+    </select>
+
+</mapper>

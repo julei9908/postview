@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 公司 -->
+<mapper namespace="org.bluron.postview.dao.SysCompanyDao">
+
+	<!-- 实体与数据库表字段映射 -->
+	<resultMap id="sysCompany" type="org.bluron.postview.entity.pojo.SysCompany">
+        <result property="companyId" column="company_id"/>
+        <result property="companyName" column="company_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+	</resultMap>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		t.company_id,t.company_name,t.create_time,t.update_time
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="save" parameterType="org.bluron.postview.entity.pojo.SysCompany">
+        insert into sys_company (
+        	company_name,
+        	create_time
+        ) values (
+        	#{companyName,jdbcType=VARCHAR},
+			now()
+        )
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update">
+        update sys_company
+		set company_name = #{companyName,jdbcType=VARCHAR}
+        where company_id = #{companyId}
+	</update>
+
+	<!-- 删除 -->
+    <delete id="delete">
+        delete from sys_company where company_id = #{companyId}
+    </delete>
+
+	<!-- 单个查询 -->
+    <select id="get" resultMap="sysCompany">
+		select <include refid="columns" />
+		from sys_company t
+		where t.company_id = #{companyId}
+	</select>
+
+	<sql id="where">
+		<where>
+	        <if test=" companyId != null ">
+				and t.company_id = #{companyId}
+		    </if>
+	        <if test=" companyName != null and companyName != '' ">
+				and t.company_name = #{companyName}
+		    </if>
+			<if test=" query != null and query != '' ">
+				and (t.company_name like "%"#{query}"%" or t.company_id like "%"#{query}"%")
+			</if>
+		</where>
+	</sql>
+
+    <!--分页查询-->
+    <select id="pageQuery" parameterType="org.bluron.postview.entity.vo.SysCompanyVo" resultMap="sysCompany">
+    	select <include refid="columns" />
+	    from sys_company t
+		<include refid="where"/>
+    </select>
+
+</mapper>

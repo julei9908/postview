@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 用户 -->
+<mapper namespace="org.bluron.postview.dao.SysUserDao">
+
+	<!-- 实体与数据库表字段映射 -->
+	<resultMap id="sysUser" type="org.bluron.postview.entity.pojo.SysUser">
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="state" column="state"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+	</resultMap>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		t.user_id,t.username,t.password,t.state,t.create_time,t.update_time
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="save" parameterType="org.bluron.postview.entity.pojo.SysUser">
+        insert into sys_user (
+        	username,
+        	password,
+        	state,
+        	create_time
+        ) values (
+        	#{username,jdbcType=VARCHAR},
+        	#{password,jdbcType=VARCHAR},
+        	#{state,jdbcType=NUMERIC},
+			now()
+        )
+	</insert>
+
+	<!-- 更新 -->
+	<update id="update">
+        update sys_user set
+	        username = #{username,jdbcType=VARCHAR},
+	        password = #{password,jdbcType=VARCHAR},
+	        state = #{state,jdbcType=NUMERIC}
+        where user_id = #{userId}
+	</update>
+
+	<!-- 更新不为空字段 -->
+	<update id="updateIfNotNull">
+        update sys_user
+		<set>
+			<if test=" username != null and username != '' ">
+				username = #{username,jdbcType=VARCHAR},
+			</if>
+			<if test=" password != null and password != '' ">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test=" state != null ">
+				state = #{state,jdbcType=NUMERIC} ,
+			</if>
+		</set>
+		where user_id = #{userId}
+	</update>
+
+	<!-- 根据主键查询 -->
+    <select id="get" resultMap="sysUser">
+		select <include refid="columns"/>
+		from sys_user t
+		where t.user_id = #{userId}
+	</select>
+
+	<!-- 根据用户名查询 -->
+    <select id="getByUsername" resultMap="sysUser">
+		select <include refid="columns"/>
+		from sys_user t
+		where t.username = #{username}
+	</select>
+
+	<sql id="where">
+		<where>
+	        <if test=" userId != null ">
+				and t.user_id = #{userId}
+		    </if>
+	        <if test=" username != null and username != '' ">
+				and t.username = #{username}
+		    </if>
+	        <if test=" state != null ">
+				and t.state = #{state}
+		    </if>
+			<if test=" query != null and query != '' ">
+				and (t.username like "%"#{query}"%" or t.user_id like "%"#{query}"%")
+			</if>
+		</where>
+	</sql>
+
+    <!--分页查询-->
+    <select id="pageQuery" parameterType="org.bluron.postview.entity.vo.SysUserVo" resultMap="sysUser">
+    	select <include refid="columns"/>
+	    from sys_user t
+		<include refid="where"/>
+    </select>
+
+</mapper>

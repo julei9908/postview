@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 用户角色 -->
+<mapper namespace="org.bluron.postview.dao.SysUserRoleDao">
+	
+	<!-- 实体与数据库表字段映射 -->
+	<resultMap id="sysUserRole" type="org.bluron.postview.entity.pojo.SysUserRole">
+        <result property="userId" column="user_id"/>
+        <result property="roleId" column="role_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+	</resultMap>
+	
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		t.user_id,t.role_id,t.create_time,t.update_time
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="save" parameterType="org.bluron.postview.entity.pojo.SysUserRole">
+        insert into sys_user_role (
+        	user_id,
+        	role_id,
+        	create_time
+        ) values (
+        	#{userId,jdbcType=NUMERIC},
+        	#{roleId,jdbcType=NUMERIC},
+			now()
+        )
+	</insert>
+
+	<!-- 修改 -->
+	<update id="update">
+        update sys_user_role
+		set role_id = #{roleId,jdbcType=NUMERIC}
+        where user_id = #{userId}
+	</update>
+
+	<!-- 根据用户ID查询 -->
+	<select id="getRoleByUserId" resultMap="sysUserRole">
+        select <include refid="columns"/>
+		from sys_user_role t
+        where user_id = #{userId}
+	</select>
+	
+	<sql id="where">
+		<where>	      				
+	        <if test=" userId != null ">
+				and t.user_id = #{userId}
+		    </if>
+	        <if test=" roleId != null ">
+				and t.role_id = #{roleId}
+		    </if>
+		</where>
+	</sql>
+    
+    <!--分页查询-->
+    <select id="pageQuery" parameterType="org.bluron.postview.entity.vo.SysUserRoleVo" resultMap="sysUserRole">
+    	select <include refid="columns"/>
+	    from sys_user_role t
+		<include refid="where"/>
+    </select>
+	
+</mapper>
